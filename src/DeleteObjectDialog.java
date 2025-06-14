@@ -41,18 +41,22 @@ public class DeleteObjectDialog extends JDialog {
     }
 
     private void loadObjects() {
-        // Aquí se cargarían los objetos perdidos desde la base de datos
-        // Por ejemplo: objectComboBox.addItem("Objeto 1");
+        MainFrame parentFrame = (MainFrame) getParent();
+        DatabaseManager dbManager = parentFrame.getDbManager();
+        for (ObjetoPerdido obj : dbManager.listObjects()) {
+            objectComboBox.addItem(obj.getId() + ": " + obj.getNombre());
+        }
     }
 
     private void deleteObject() {
-        String selectedObject = (String) objectComboBox.getSelectedItem();
-        if (selectedObject != null) {
-            // Aquí se implementaría la lógica para eliminar el objeto de la base de datos
-            JOptionPane.showMessageDialog(this, "Objeto eliminado: " + selectedObject);
+        String selected = (String) objectComboBox.getSelectedItem();
+        if (selected != null && selected.contains(":")) {
+            int id = Integer.parseInt(selected.split(":")[0]);
+            MainFrame parentFrame = (MainFrame) getParent();
+            parentFrame.getDbManager().deleteObject(id);
+            JOptionPane.showMessageDialog(this, "Objeto eliminado.");
+            parentFrame.refreshObjectList(); // Actualiza lista
             dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione un objeto para eliminar.");
         }
     }
 }

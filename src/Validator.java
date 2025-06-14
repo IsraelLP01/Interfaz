@@ -9,8 +9,8 @@ public class Validator {
     }
 
     public static boolean isValidDate(String date) {
-        // Simple date validation (format: YYYY-MM-DD)
-        return date != null && date.matches("\\d{4}-\\d{2}-\\d{2}");
+        // Updated date validation (format: DD-MM-YYYY)
+        return date != null && date.matches("\\d{2}-\\d{2}-\\d{4}");
     }
 
     public static boolean isValidId(int id) {

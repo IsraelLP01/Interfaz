@@ -43,17 +43,16 @@ public class SearchObjectDialog extends JDialog {
     }
 
     private void searchObject() {
-        String searchTerm = searchField.getText().trim();
-        // Aquí se llamaría al método de búsqueda en la base de datos
-        // y se mostrarían los resultados en resultArea.
-        // Este es un ejemplo de cómo se podría implementar:
-        
-        // resultArea.setText("Resultados de búsqueda para: " + searchTerm);
-        // resultArea.append("\n1. Objeto A");
-        // resultArea.append("\n2. Objeto B");
-        
-        // Limpiar el área de resultados antes de mostrar nuevos resultados
+        String searchTerm = searchField.getText().trim().toLowerCase();
         resultArea.setText("Resultados de búsqueda para: " + searchTerm + "\n");
-        // Aquí se debería agregar la lógica para buscar en la base de datos
+
+        MainFrame parentFrame = (MainFrame) getParent();
+        for (ObjetoPerdido obj : parentFrame.getDbManager().listObjects()) {
+            if (obj.getNombre().toLowerCase().contains(searchTerm)) {
+                resultArea.append("ID: " + obj.getId() + "\nNombre: " + obj.getNombre() +
+                        "\nDescripción: " + obj.getDescripcion() +
+                        "\nFecha: " + obj.getFechaPerdida() + "\n\n");
+            }
+        }
     }
 }
