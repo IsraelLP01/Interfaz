@@ -4,8 +4,17 @@ import java.awt.event.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import javax.swing.text.JTextComponent;
 
 public class AddObjectDialog extends JDialog {
+    // Definición de colores para el tema
+    private static final Color BACKGROUND_COLOR = new Color(50, 50, 50);  // Gris oscuro
+    private static final Color PANEL_COLOR = new Color(60, 60, 60);       // Gris un poco más claro
+    private static final Color TEXT_COLOR = new Color(230, 230, 230);     // Texto casi blanco
+    private static final Color BUTTON_BLUE = new Color(59, 89, 182);      // Azul para botones
+    private static final Color BUTTON_ORANGE = new Color(255, 127, 0);    // Naranja para botón de eliminar
+    private static final Color BORDER_COLOR = new Color(80, 80, 80);      // Borde gris
+    
     private JTextField nameField;
     private JTextArea descriptionField;
     private JTextField dateField;
@@ -19,37 +28,50 @@ public class AddObjectDialog extends JDialog {
 
     public AddObjectDialog(Frame parent) {
         super(parent, "Agregar Objeto Perdido", true);
+        getContentPane().setBackground(BACKGROUND_COLOR);
 
         // Create components
         JLabel nameLabel = new JLabel("Nombre:");
+        nameLabel.setForeground(TEXT_COLOR);
         nameField = new JTextField(20);
+        configureTextField(nameField);
 
         JLabel descriptionLabel = new JLabel("Descripción:");
+        descriptionLabel.setForeground(TEXT_COLOR);
         descriptionField = new JTextArea(5, 20);
         descriptionField.setLineWrap(true);
         descriptionField.setWrapStyleWord(true);
+        configureTextComponent(descriptionField);
         JScrollPane descScrollPane = new JScrollPane(descriptionField);
+        descScrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        descScrollPane.getViewport().setBackground(PANEL_COLOR);
 
         JLabel dateLabel = new JLabel("Fecha (DD-MM-YYYY):");
+        dateLabel.setForeground(TEXT_COLOR);
         dateField = new JTextField(10);
+        configureTextField(dateField);
 
         // Add "Hoy" button
-        JButton todayButton = new JButton("Hoy");
+        JButton todayButton = createStyledButton("Hoy", BUTTON_BLUE);
         todayButton.addActionListener(e -> {
             // Get current date and format it as DD-MM-YYYY
             String today = LocalDate.now().format(dateFormatter);
             dateField.setText(today);
         });
 
-        photoButton = new JButton("Seleccionar Foto");
+        photoButton = createStyledButton("Seleccionar Foto", BUTTON_BLUE);
         photoPathLabel = new JLabel("Sin foto seleccionada");
+        photoPathLabel.setForeground(TEXT_COLOR);
         photoPreview = new JLabel();
         photoPreview.setPreferredSize(new Dimension(200, 200));
-        photoPreview.setBorder(BorderFactory.createEtchedBorder());
+        photoPreview.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         photoPreview.setHorizontalAlignment(JLabel.CENTER);
+        photoPreview.setOpaque(true);
+        photoPreview.setBackground(new Color(70, 70, 70));
+        photoPreview.setForeground(TEXT_COLOR);
 
-        JButton addButton = new JButton("Agregar");
-        JButton cancelButton = new JButton("Cancelar");
+        JButton addButton = createStyledButton("Agregar", BUTTON_BLUE);
+        JButton cancelButton = createStyledButton("Cancelar", BUTTON_BLUE);
 
         // Set up photo selection
         photoButton.addActionListener(e -> {
@@ -127,9 +149,12 @@ public class AddObjectDialog extends JDialog {
         // Layout components
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(BACKGROUND_COLOR);
 
         // Form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(PANEL_COLOR);
+        formPanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
@@ -181,6 +206,7 @@ public class AddObjectDialog extends JDialog {
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
+        photoPathLabel.setPreferredSize(new Dimension(300, 20));
         formPanel.add(photoPathLabel, gbc);
 
         gbc.gridx = 0;
@@ -191,6 +217,7 @@ public class AddObjectDialog extends JDialog {
 
         // Button panel
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(PANEL_COLOR);
         buttonPanel.add(addButton);
         buttonPanel.add(cancelButton);
 
@@ -199,7 +226,51 @@ public class AddObjectDialog extends JDialog {
 
         add(mainPanel);
         pack();
-        setSize(500, 600);
+        setSize(550, 600);
         setLocationRelativeTo(parent);
+    }
+    
+    private void configureTextField(JTextField field) {
+        field.setBackground(PANEL_COLOR);
+        field.setForeground(TEXT_COLOR);
+        field.setCaretColor(TEXT_COLOR);
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR),
+            BorderFactory.createEmptyBorder(4, 6, 4, 6)
+        ));
+    }
+    
+    private void configureTextComponent(JTextComponent textComp) {
+        textComp.setBackground(PANEL_COLOR);
+        textComp.setForeground(TEXT_COLOR);
+        textComp.setCaretColor(TEXT_COLOR);
+        textComp.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR),
+            BorderFactory.createEmptyBorder(4, 6, 4, 6)
+        ));
+    }
+    
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setBackground(backgroundColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Efecto hover
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(backgroundColor.brighter());
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(backgroundColor);
+            }
+        });
+        
+        return button;
     }
 }
