@@ -2,10 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.format.DateTimeFormatter;
-<<<<<<< HEAD
 import java.io.File;
-=======
->>>>>>> origin/main
 
 public class SearchObjectDialog extends JDialog {
     // Definición de colores para el tema
@@ -84,28 +81,12 @@ public class SearchObjectDialog extends JDialog {
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
-<<<<<<< HEAD
         // Panel de resultados con scroll
         resultsContainerPanel = new JPanel();
         resultsContainerPanel.setBackground(new Color(70, 70, 70));
         resultsContainerPanel.setLayout(new BoxLayout(resultsContainerPanel, BoxLayout.Y_AXIS));
         
         scrollPane = new JScrollPane(resultsContainerPanel);
-=======
-        // Área de resultados
-        resultArea = new JTextArea(15, 40);
-        resultArea.setEditable(false);
-        resultArea.setBackground(new Color(70, 70, 70));
-        resultArea.setForeground(TEXT_COLOR);
-        resultArea.setCaretColor(TEXT_COLOR);
-        resultArea.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-        resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        
-        JScrollPane scrollPane = new JScrollPane(resultArea);
->>>>>>> origin/main
         scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         scrollPane.getViewport().setBackground(new Color(70, 70, 70));
         
@@ -168,7 +149,6 @@ public class SearchObjectDialog extends JDialog {
     private void searchObject() {
         String searchTerm = searchField.getText().trim().toLowerCase();
         if (searchTerm.isEmpty()) {
-<<<<<<< HEAD
             JOptionPane.showMessageDialog(this,
                     "Por favor ingrese un término de búsqueda.",
                     "Búsqueda vacía", JOptionPane.WARNING_MESSAGE);
@@ -189,23 +169,11 @@ public class SearchObjectDialog extends JDialog {
         boolean found = false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         
-=======
-            resultArea.setText("Por favor ingrese un término de búsqueda.");
-            return;
-        }
-        
-        resultArea.setText("Resultados de búsqueda para: \"" + searchTerm + "\"\n");
-        resultArea.append("----------------------------------------\n\n");
-        
-        boolean found = false;
-        MainFrame parentFrame = (MainFrame) getParent();
->>>>>>> origin/main
         for (ObjetoPerdido obj : parentFrame.getDbManager().listObjects()) {
             if (obj.getNombre().toLowerCase().contains(searchTerm) || 
                 obj.getDescripcion().toLowerCase().contains(searchTerm)) {
                 
                 found = true;
-<<<<<<< HEAD
                 
                 // Panel para este resultado
                 JPanel resultPanel = new JPanel();
@@ -306,21 +274,10 @@ public class SearchObjectDialog extends JDialog {
                 
                 resultsContainerPanel.add(resultPanel);
                 resultsContainerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-=======
-                resultArea.append("ID: " + obj.getId() + "\n");
-                resultArea.append("Nombre: " + obj.getNombre() + "\n");
-                resultArea.append("Descripción: " + obj.getDescripcion() + "\n");
-                resultArea.append("Fecha: " + obj.getFechaPerdida().format(
-                    DateTimeFormatter.ofPattern("dd-MM-yyyy")) + "\n");
-                resultArea.append("Foto: " + (obj.getRutaFoto() != null && !obj.getRutaFoto().isEmpty() ? 
-                    "Sí" : "No") + "\n");
-                resultArea.append("\n----------------------------------------\n\n");
->>>>>>> origin/main
             }
         }
         
         if (!found) {
-<<<<<<< HEAD
             JLabel noResultsLabel = new JLabel("No se encontraron objetos que coincidan con el término de búsqueda.");
             noResultsLabel.setForeground(TEXT_COLOR);
             noResultsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -334,12 +291,5 @@ public class SearchObjectDialog extends JDialog {
         
         // Asegurar que se muestra el inicio de los resultados
         scrollPane.getVerticalScrollBar().setValue(0);
-=======
-            resultArea.append("No se encontraron objetos que coincidan con el término de búsqueda.\n");
-        }
-        
-        // Volver al inicio del área de texto
-        resultArea.setCaretPosition(0);
->>>>>>> origin/main
     }
 }

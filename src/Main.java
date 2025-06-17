@@ -11,15 +11,12 @@ public class Main {
             e.printStackTrace();
         }
 
-<<<<<<< HEAD
         // Configurar los botones de diálogo en español
         UIManager.put("OptionPane.yesButtonText", "Sí");
         UIManager.put("OptionPane.noButtonText", "No");
         UIManager.put("OptionPane.cancelButtonText", "Cancelar");
         UIManager.put("OptionPane.okButtonText", "Aceptar");
 
-=======
->>>>>>> origin/main
         SwingUtilities.invokeLater(() -> {
             try {
                                 // Conectar a la base de datos MySQL de XAMPP

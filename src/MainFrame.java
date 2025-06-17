@@ -13,22 +13,14 @@ public class MainFrame extends JFrame {
     private static final Color PANEL_COLOR = new Color(60, 60, 60);       // Gris un poco más claro
     private static final Color TEXT_COLOR = new Color(230, 230, 230);     // Texto casi blanco
     private static final Color BUTTON_BLUE = new Color(59, 89, 182);      // Azul para botones
-<<<<<<< HEAD
     private static final Color BUTTON_RED = new Color(220, 53, 69);    // Rojo para botón de eliminar
     private static final Color BUTTON_ORANGE = new Color(255, 140, 0);    // Naranja para botón de cambiar estatus
-=======
-    private static final Color BUTTON_ORANGE = new Color(255, 127, 0);    // Naranja para botón de eliminar
->>>>>>> origin/main
     private static final Color BORDER_COLOR = new Color(80, 80, 80);      // Borde gris
 
     private JList<ObjetoPerdido> objectList;
     private DefaultListModel<ObjetoPerdido> listModel;
     private DatabaseManager dbManager;
     private Map<Integer, ImageIcon> imageCache = new HashMap<>();
-<<<<<<< HEAD
-=======
-    private Rectangle buttonRect = new Rectangle();
->>>>>>> origin/main
 
     public MainFrame(DatabaseManager dbManager) {
         this.dbManager = dbManager;
@@ -62,28 +54,20 @@ public class MainFrame extends JFrame {
         
         // Crear botones principales
         JButton addButton = createStyledButton("Agregar Objeto", BUTTON_BLUE);
-<<<<<<< HEAD
         JButton deleteButton = createStyledButton("Eliminar Objeto", BUTTON_RED); // Cambiado de BUTTON_ORANGE a BUTTON_RED
         JButton searchButton = createStyledButton("Buscar Objeto", BUTTON_BLUE);
         JButton editButton = createStyledButton("Editar Objeto", BUTTON_BLUE);
         JButton viewImageButton = createStyledButton("Ver Imagen", BUTTON_BLUE);     // Nuevo botón para ver imagen
         JButton changeStatusButton = createStyledButton("Cambiar Estatus", BUTTON_ORANGE); // Nuevo botón para cambiar estatus
-=======
-        JButton deleteButton = createStyledButton("Eliminar Objeto", BUTTON_ORANGE); // Naranja para este botón
-        JButton searchButton = createStyledButton("Buscar Objeto", BUTTON_BLUE);
->>>>>>> origin/main
         
         // Aplicar máximo ancho a los botones
         Dimension buttonSize = new Dimension(130, 40);
         addButton.setMaximumSize(buttonSize);
         deleteButton.setMaximumSize(buttonSize);
         searchButton.setMaximumSize(buttonSize);
-<<<<<<< HEAD
         editButton.setMaximumSize(buttonSize);
         viewImageButton.setMaximumSize(buttonSize);      // Tamaño para botón de ver imagen
         changeStatusButton.setMaximumSize(buttonSize);   // Tamaño para botón de cambiar estatus
-=======
->>>>>>> origin/main
 
         // Configurar acciones de botones
         addButton.addActionListener(e -> {
@@ -101,7 +85,6 @@ public class MainFrame extends JFrame {
             dialog.setVisible(true);
         });
         
-<<<<<<< HEAD
         // Configurar acción para el botón de editar
         editButton.addActionListener(e -> {
             // Verificar si hay un objeto seleccionado
@@ -191,15 +174,6 @@ public class MainFrame extends JFrame {
         sidePanel.add(Box.createRigidArea(new Dimension(0, 25)));
         sidePanel.add(selectionPanel);
         sidePanel.add(Box.createVerticalGlue());  // Empujar todo hacia arriba
-=======
-        // Añadir botones al panel lateral con espaciado
-        sidePanel.add(addButton);
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        sidePanel.add(deleteButton);
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        sidePanel.add(searchButton);
-        sidePanel.add(Box.createVerticalGlue());  // Empujar botones hacia arriba
->>>>>>> origin/main
 
         // Crear el modelo de lista y JList
         listModel = new DefaultListModel<>();
@@ -212,7 +186,6 @@ public class MainFrame extends JFrame {
         objectList.setSelectionBackground(BUTTON_BLUE);
         objectList.setSelectionForeground(Color.WHITE);
         
-<<<<<<< HEAD
         // Añadir doble clic para ver la imagen
         objectList.addMouseListener(new MouseAdapter() {
             @Override
@@ -221,30 +194,6 @@ public class MainFrame extends JFrame {
                     ObjetoPerdido selected = objectList.getSelectedValue();
                     if (selected != null && selected.getRutaFoto() != null && !selected.getRutaFoto().isEmpty()) {
                         new ImageViewerDialog(MainFrame.this, selected.getRutaFoto(), selected.getNombre()).setVisible(true);
-=======
-        // Agregar detector de clics para el botón de ver imagen
-        objectList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int index = objectList.locationToIndex(e.getPoint());
-                if (index != -1) {
-                    Rectangle cellBounds = objectList.getCellBounds(index, index);
-                    // Ajustar la posición de buttonRect relativa a la celda
-                    if (buttonRect != null && 
-                        e.getX() >= cellBounds.x + buttonRect.x && 
-                        e.getX() <= cellBounds.x + buttonRect.x + buttonRect.width && 
-                        e.getY() >= cellBounds.y + buttonRect.y && 
-                        e.getY() <= cellBounds.y + buttonRect.y + buttonRect.height) {
-                        
-                        ObjetoPerdido obj = objectList.getModel().getElementAt(index);
-                        if (obj.getRutaFoto() != null && !obj.getRutaFoto().isEmpty()) {
-                            new ImageViewerDialog(MainFrame.this, obj.getRutaFoto(), obj.getNombre()).setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(MainFrame.this, 
-                                "Este objeto no tiene imagen asociada", 
-                                "Sin imagen", JOptionPane.INFORMATION_MESSAGE);
-                        }
->>>>>>> origin/main
                     }
                 }
             }
@@ -308,11 +257,7 @@ public class MainFrame extends JFrame {
         private JLabel nameLabel;
         private JLabel descLabel;
         private JLabel dateLabel;
-<<<<<<< HEAD
         private JLabel statusLabel; // Etiqueta para estatus
-=======
-        private JButton viewImageButton;
->>>>>>> origin/main
         private JPanel infoPanel;
         private JPanel westPanel;
         
@@ -333,11 +278,7 @@ public class MainFrame extends JFrame {
             
             // Panel para la información de texto
             infoPanel = new JPanel();
-<<<<<<< HEAD
             infoPanel.setLayout(new GridLayout(5, 1, 0, 2)); // 5 filas para incluir estatus
-=======
-            infoPanel.setLayout(new GridLayout(4, 1, 0, 2));
->>>>>>> origin/main
             infoPanel.setBackground(PANEL_COLOR);
             
             idLabel = new JLabel();
@@ -356,39 +297,20 @@ public class MainFrame extends JFrame {
             dateLabel.setFont(new Font("Arial", Font.ITALIC, 12));
             dateLabel.setForeground(new Color(200, 200, 200)); // Gris claro para la fecha
             
-<<<<<<< HEAD
             // Etiqueta para el estatus
             statusLabel = new JLabel();
             statusLabel.setFont(new Font("Arial", Font.BOLD, 12));
             statusLabel.setForeground(new Color(250, 250, 100)); // Color llamativo para el estatus
             
-=======
->>>>>>> origin/main
             infoPanel.add(idLabel);
             infoPanel.add(nameLabel);
             infoPanel.add(descLabel);
             infoPanel.add(dateLabel);
-<<<<<<< HEAD
             infoPanel.add(statusLabel); // Añadir etiqueta de estatus
             
             westPanel = new JPanel(new BorderLayout());
             westPanel.setBackground(PANEL_COLOR);
             westPanel.add(imageLabel, BorderLayout.CENTER);
-=======
-            
-            // Botón para ver la imagen
-            viewImageButton = new JButton("Ver Imagen");
-            viewImageButton.setBackground(BUTTON_BLUE);
-            viewImageButton.setForeground(Color.WHITE);
-            viewImageButton.setFocusPainted(false);
-            viewImageButton.setBorderPainted(false);
-            viewImageButton.setPreferredSize(new Dimension(100, 30));
-            
-            westPanel = new JPanel(new BorderLayout(0, 5));
-            westPanel.setBackground(PANEL_COLOR);
-            westPanel.add(imageLabel, BorderLayout.CENTER);
-            westPanel.add(viewImageButton, BorderLayout.SOUTH);
->>>>>>> origin/main
             
             add(westPanel, BorderLayout.WEST);
             add(infoPanel, BorderLayout.CENTER);
@@ -405,7 +327,6 @@ public class MainFrame extends JFrame {
             nameLabel.setText("Nombre: " + obj.getNombre());
             descLabel.setText("Descripción: " + obj.getDescripcion());
             
-<<<<<<< HEAD
             // Formatear la fecha perdida
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             String formattedDateLost = obj.getFechaPerdida().format(formatter);
@@ -424,12 +345,6 @@ public class MainFrame extends JFrame {
             } else {
                 statusLabel.setForeground(new Color(250, 100, 100)); // Rojo para perdido
             }
-=======
-            // Formatear la fecha
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String formattedDate = obj.getFechaPerdida().format(formatter);
-            dateLabel.setText("Fecha: " + formattedDate);
->>>>>>> origin/main
             
             // Cargar imagen del objeto
             if (obj.getRutaFoto() != null && !obj.getRutaFoto().isEmpty()) {
@@ -450,24 +365,11 @@ public class MainFrame extends JFrame {
                 }
                 imageLabel.setIcon(icon);
                 imageLabel.setText("");
-<<<<<<< HEAD
             } else {
                 imageLabel.setIcon(null);
                 imageLabel.setText("Sin imagen");
             }
             
-=======
-                viewImageButton.setEnabled(true);
-            } else {
-                imageLabel.setIcon(null);
-                imageLabel.setText("Sin imagen");
-                viewImageButton.setEnabled(false);
-            }
-            
-            // Almacenar la posición del botón para detectar clics
-            buttonRect.setBounds(viewImageButton.getBounds());
-            
->>>>>>> origin/main
             // Estilos según selección
             if (isSelected) {
                 setBackground(BUTTON_BLUE.darker());
@@ -500,7 +402,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-<<<<<<< HEAD
     // Método para cambiar el estatus de un objeto
     private void cambiarEstatus(ObjetoPerdido obj) {
         String nuevoEstatus = "Perdido".equals(obj.getEstatus()) ? "Encontrado" : "Perdido";
@@ -545,8 +446,6 @@ public class MainFrame extends JFrame {
             "Objeto no encontrado", JOptionPane.WARNING_MESSAGE);
     }
 
-=======
->>>>>>> origin/main
     // Getter para el manejador de base de datos
     public DatabaseManager getDbManager() {
         return dbManager;
