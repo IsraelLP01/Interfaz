@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.format.DateTimeFormatter;
+import java.io.File;
 
 public class SearchObjectDialog extends JDialog {
     // Definición de colores para el tema
@@ -15,9 +16,16 @@ public class SearchObjectDialog extends JDialog {
     private JTextField searchField;
     private JTextArea resultArea;
     private JButton searchButton;
+    private JScrollPane scrollPane;  // Guardar referencia al JScrollPane
+    private JPanel resultsContainerPanel; // Panel para contener resultados individuales
+    
+    // Referencia al objeto padre MainFrame
+    private MainFrame parentFrame;
 
     public SearchObjectDialog(Frame parent) {
         super(parent, "Buscar Objeto Perdido", true);
+        this.parentFrame = (MainFrame) parent;
+        
         setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
 
@@ -73,19 +81,12 @@ public class SearchObjectDialog extends JDialog {
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
-        // Área de resultados
-        resultArea = new JTextArea(15, 40);
-        resultArea.setEditable(false);
-        resultArea.setBackground(new Color(70, 70, 70));
-        resultArea.setForeground(TEXT_COLOR);
-        resultArea.setCaretColor(TEXT_COLOR);
-        resultArea.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-        resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        // Panel de resultados con scroll
+        resultsContainerPanel = new JPanel();
+        resultsContainerPanel.setBackground(new Color(70, 70, 70));
+        resultsContainerPanel.setLayout(new BoxLayout(resultsContainerPanel, BoxLayout.Y_AXIS));
         
-        JScrollPane scrollPane = new JScrollPane(resultArea);
+        scrollPane = new JScrollPane(resultsContainerPanel);
         scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         scrollPane.getViewport().setBackground(new Color(70, 70, 70));
         
@@ -142,41 +143,153 @@ public class SearchObjectDialog extends JDialog {
         
         pack();
         setLocationRelativeTo(parent);
+        setSize(600, 500);
     }
 
     private void searchObject() {
         String searchTerm = searchField.getText().trim().toLowerCase();
         if (searchTerm.isEmpty()) {
-            resultArea.setText("Por favor ingrese un término de búsqueda.");
+            JOptionPane.showMessageDialog(this,
+                    "Por favor ingrese un término de búsqueda.",
+                    "Búsqueda vacía", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
-        resultArea.setText("Resultados de búsqueda para: \"" + searchTerm + "\"\n");
-        resultArea.append("----------------------------------------\n\n");
+        // Limpiar resultados anteriores
+        resultsContainerPanel.removeAll();
+        
+        // Añadir título de resultados
+        JLabel titleLabel = new JLabel("Resultados de búsqueda para: \"" + searchTerm + "\"");
+        titleLabel.setForeground(TEXT_COLOR);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+        resultsContainerPanel.add(titleLabel);
         
         boolean found = false;
-        MainFrame parentFrame = (MainFrame) getParent();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        
         for (ObjetoPerdido obj : parentFrame.getDbManager().listObjects()) {
             if (obj.getNombre().toLowerCase().contains(searchTerm) || 
                 obj.getDescripcion().toLowerCase().contains(searchTerm)) {
                 
                 found = true;
-                resultArea.append("ID: " + obj.getId() + "\n");
-                resultArea.append("Nombre: " + obj.getNombre() + "\n");
-                resultArea.append("Descripción: " + obj.getDescripcion() + "\n");
-                resultArea.append("Fecha: " + obj.getFechaPerdida().format(
-                    DateTimeFormatter.ofPattern("dd-MM-yyyy")) + "\n");
-                resultArea.append("Foto: " + (obj.getRutaFoto() != null && !obj.getRutaFoto().isEmpty() ? 
-                    "Sí" : "No") + "\n");
-                resultArea.append("\n----------------------------------------\n\n");
+                
+                // Panel para este resultado
+                JPanel resultPanel = new JPanel();
+                resultPanel.setLayout(new BorderLayout());
+                resultPanel.setBackground(new Color(80, 80, 80));
+                resultPanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER_COLOR),
+                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                ));
+                resultPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+                resultPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                // Información del objeto
+                JPanel infoPanel = new JPanel();
+                infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+                infoPanel.setBackground(new Color(80, 80, 80));
+                
+                JLabel idLabel = new JLabel("ID: " + obj.getId());
+                idLabel.setForeground(TEXT_COLOR);
+                idLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                JLabel nameLabel = new JLabel("Nombre: " + obj.getNombre());
+                nameLabel.setForeground(TEXT_COLOR);
+                nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+                nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                JLabel descLabel = new JLabel("Descripción: " + obj.getDescripcion());
+                descLabel.setForeground(TEXT_COLOR);
+                descLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                JLabel dateLabel = new JLabel("Fecha pérdida: " + obj.getFechaPerdida().format(formatter));
+                dateLabel.setForeground(TEXT_COLOR);
+                dateLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                JLabel statusLabel = new JLabel("Estatus: " + obj.getEstatus());
+                statusLabel.setForeground("Encontrado".equals(obj.getEstatus()) ? 
+                        new Color(100, 250, 100) : new Color(250, 100, 100));
+                statusLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                
+                infoPanel.add(idLabel);
+                infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                infoPanel.add(nameLabel);
+                infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                infoPanel.add(descLabel);
+                infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                infoPanel.add(dateLabel);
+                infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                infoPanel.add(statusLabel);
+                
+                if (obj.getEstatus().equals("Encontrado") && obj.getFechaEncontrado() != null) {
+                    JLabel dateFoundLabel = new JLabel("Fecha encontrado: " + obj.getFechaEncontrado().format(formatter));
+                    dateFoundLabel.setForeground(TEXT_COLOR);
+                    dateFoundLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                    infoPanel.add(dateFoundLabel);
+                }
+                
+                // Panel para los botones
+                JPanel actionPanel = new JPanel();
+                actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+                actionPanel.setBackground(new Color(80, 80, 80));
+                
+                // Botón para ir al objeto en la lista
+                JButton selectButton = new JButton("Seleccionar en la lista");
+                selectButton.setBackground(BUTTON_BLUE);
+                selectButton.setForeground(Color.WHITE);
+                selectButton.setFocusPainted(false);
+                selectButton.setBorderPainted(false);
+                
+                // Crear una referencia final al objeto para usar en el listener
+                final ObjetoPerdido foundObject = obj;
+                
+                selectButton.addActionListener(e -> {
+                    // Cerrar el diálogo
+                    dispose();
+                    
+                    // Seleccionar el objeto en la lista principal
+                    parentFrame.selectObject(foundObject.getId());
+                });
+                
+                // Efecto hover para el botón
+                selectButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        selectButton.setBackground(BUTTON_BLUE.brighter());
+                    }
+                    
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        selectButton.setBackground(BUTTON_BLUE);
+                    }
+                });
+                
+                actionPanel.add(selectButton);
+                
+                resultPanel.add(infoPanel, BorderLayout.CENTER);
+                resultPanel.add(actionPanel, BorderLayout.SOUTH);
+                
+                resultsContainerPanel.add(resultPanel);
+                resultsContainerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             }
         }
         
         if (!found) {
-            resultArea.append("No se encontraron objetos que coincidan con el término de búsqueda.\n");
+            JLabel noResultsLabel = new JLabel("No se encontraron objetos que coincidan con el término de búsqueda.");
+            noResultsLabel.setForeground(TEXT_COLOR);
+            noResultsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            noResultsLabel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
+            resultsContainerPanel.add(noResultsLabel);
         }
         
-        // Volver al inicio del área de texto
-        resultArea.setCaretPosition(0);
+        // Actualizar UI
+        resultsContainerPanel.revalidate();
+        resultsContainerPanel.repaint();
+        
+        // Asegurar que se muestra el inicio de los resultados
+        scrollPane.getVerticalScrollBar().setValue(0);
     }
 }

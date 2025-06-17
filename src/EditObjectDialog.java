@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javax.swing.text.JTextComponent;
 
-public class AddObjectDialog extends JDialog {
+public class EditObjectDialog extends JDialog {
     // Definición de colores para el tema
     private static final Color BACKGROUND_COLOR = new Color(50, 50, 50);  // Gris oscuro
     private static final Color PANEL_COLOR = new Color(60, 60, 60);       // Gris un poco más claro
@@ -21,24 +21,33 @@ public class AddObjectDialog extends JDialog {
     private JLabel photoPreview;
     private JButton photoButton;
     private JLabel photoPathLabel;
+    private JComboBox<String> statusComboBox;
+    private JTextField dateFoundField;
     private final String[] photoPath = { "" };
+    private ObjetoPerdido objetoOriginal;
 
     // Date formatter for DD-MM-YYYY format
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public AddObjectDialog(Frame parent) {
-        super(parent, "Agregar Objeto Perdido", true);
+    public EditObjectDialog(Frame parent, ObjetoPerdido objeto) {
+        super(parent, "Editar Objeto: " + objeto.getNombre(), true);
         getContentPane().setBackground(BACKGROUND_COLOR);
+        this.objetoOriginal = objeto;
+        
+        // Guardar la ruta de la foto original
+        if (objeto.getRutaFoto() != null && !objeto.getRutaFoto().isEmpty()) {
+            photoPath[0] = objeto.getRutaFoto();
+        }
 
         // Create components
         JLabel nameLabel = new JLabel("Nombre:");
         nameLabel.setForeground(TEXT_COLOR);
-        nameField = new JTextField(20);
+        nameField = new JTextField(objeto.getNombre(), 20);
         configureTextField(nameField);
 
         JLabel descriptionLabel = new JLabel("Descripción:");
         descriptionLabel.setForeground(TEXT_COLOR);
-        descriptionField = new JTextArea(5, 20);
+        descriptionField = new JTextArea(objeto.getDescripcion(), 5, 20);
         descriptionField.setLineWrap(true);
         descriptionField.setWrapStyleWord(true);
         configureTextComponent(descriptionField);
@@ -46,9 +55,9 @@ public class AddObjectDialog extends JDialog {
         descScrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
         descScrollPane.getViewport().setBackground(PANEL_COLOR);
 
-        JLabel dateLabel = new JLabel("Fecha (DD-MM-YYYY):");
+        JLabel dateLabel = new JLabel("Fecha pérdida (DD-MM-YYYY):");
         dateLabel.setForeground(TEXT_COLOR);
-        dateField = new JTextField(10);
+        dateField = new JTextField(objeto.getFechaPerdida().format(dateFormatter), 10);
         configureTextField(dateField);
 
         // Add "Hoy" button
@@ -58,9 +67,46 @@ public class AddObjectDialog extends JDialog {
             String today = LocalDate.now().format(dateFormatter);
             dateField.setText(today);
         });
+        
+        // Selector de estatus
+        JLabel statusLabel = new JLabel("Estatus:");
+        statusLabel.setForeground(TEXT_COLOR);
+        statusComboBox = new JComboBox<>(new String[]{"Perdido", "Encontrado"});
+        statusComboBox.setSelectedItem(objeto.getEstatus());
+        statusComboBox.setBackground(PANEL_COLOR);
+        statusComboBox.setForeground(TEXT_COLOR);
+        ((JComponent)statusComboBox.getRenderer()).setOpaque(true);
+        
+        // Campo para fecha encontrado
+        JLabel dateFoundLabel = new JLabel("Fecha encontrado (DD-MM-YYYY):");
+        dateFoundLabel.setForeground(TEXT_COLOR);
+        dateFoundField = new JTextField(10);
+        configureTextField(dateFoundField);
+        if (objeto.getFechaEncontrado() != null) {
+            dateFoundField.setText(objeto.getFechaEncontrado().format(dateFormatter));
+        }
+        
+        // Habilitar/deshabilitar campo fecha encontrado según el estatus
+        statusComboBox.addActionListener(e -> {
+            boolean isFound = "Encontrado".equals(statusComboBox.getSelectedItem());
+            dateFoundField.setEnabled(isFound);
+            if (isFound && dateFoundField.getText().trim().isEmpty()) {
+                dateFoundField.setText(LocalDate.now().format(dateFormatter));
+            }
+        });
+        
+        // "Hoy" button para fecha encontrado
+        JButton todayFoundButton = createStyledButton("Hoy", BUTTON_BLUE);
+        todayFoundButton.addActionListener(e -> {
+            String today = LocalDate.now().format(dateFormatter);
+            dateFoundField.setText(today);
+        });
+        
+        // Inicializar campo de fecha encontrado
+        dateFoundField.setEnabled("Encontrado".equals(statusComboBox.getSelectedItem()));
 
-        photoButton = createStyledButton("Seleccionar Foto", BUTTON_BLUE);
-        photoPathLabel = new JLabel("Sin foto seleccionada");
+        photoButton = createStyledButton("Cambiar Foto", BUTTON_BLUE);
+        photoPathLabel = new JLabel(photoPath[0].isEmpty() ? "Sin foto seleccionada" : photoPath[0]);
         photoPathLabel.setForeground(TEXT_COLOR);
         photoPreview = new JLabel();
         photoPreview.setPreferredSize(new Dimension(200, 200));
@@ -69,8 +115,21 @@ public class AddObjectDialog extends JDialog {
         photoPreview.setOpaque(true);
         photoPreview.setBackground(new Color(70, 70, 70));
         photoPreview.setForeground(TEXT_COLOR);
+        
+        // Cargar foto existente si hay
+        if (!photoPath[0].isEmpty()) {
+            ImageIcon icon = new ImageIcon(photoPath[0]);
+            if (icon.getIconWidth() > 200 || icon.getIconHeight() > 200) {
+                Image img = icon.getImage();
+                Image scaledImg = img.getScaledInstance(200, -1, Image.SCALE_SMOOTH);
+                icon = new ImageIcon(scaledImg);
+            }
+            photoPreview.setIcon(icon);
+        } else {
+            photoPreview.setText("Sin imagen");
+        }
 
-        JButton addButton = createStyledButton("Agregar", BUTTON_BLUE);
+        JButton saveButton = createStyledButton("Guardar", BUTTON_BLUE);
         JButton cancelButton = createStyledButton("Cancelar", BUTTON_BLUE);
 
         // Set up photo selection
@@ -79,7 +138,7 @@ public class AddObjectDialog extends JDialog {
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
                     "Imágenes", "jpg", "jpeg", "png", "gif"));
 
-            int result = fileChooser.showOpenDialog(AddObjectDialog.this);
+            int result = fileChooser.showOpenDialog(EditObjectDialog.this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 photoPath[0] = fileChooser.getSelectedFile().getAbsolutePath();
                 photoPathLabel.setText(photoPath[0]);
@@ -95,11 +154,13 @@ public class AddObjectDialog extends JDialog {
             }
         });
 
-        // Set up add button action
-        addButton.addActionListener(e -> {
+        // Set up save button action
+        saveButton.addActionListener(e -> {
             String name = nameField.getText().trim();
             String description = descriptionField.getText().trim();
             String date = dateField.getText().trim();
+            String status = (String) statusComboBox.getSelectedItem();
+            String dateFound = dateFoundField.getText().trim();
             String photo = photoPath[0];
 
             // Validate input
@@ -112,32 +173,47 @@ public class AddObjectDialog extends JDialog {
 
             if (!Validator.isValidDate(date)) {
                 JOptionPane.showMessageDialog(this,
-                        "El formato de fecha debe ser DD-MM-YYYY (ej: 14-06-2025)",
+                        "El formato de fecha de pérdida debe ser DD-MM-YYYY (ej: 14-06-2025)",
+                        "Formato de fecha inválido", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
+            if ("Encontrado".equals(status) && !dateFound.isEmpty() && !Validator.isValidDate(dateFound)) {
+                JOptionPane.showMessageDialog(this,
+                        "El formato de fecha de encontrado debe ser DD-MM-YYYY (ej: 14-06-2025)",
                         "Formato de fecha inválido", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
-                // Convert String to LocalDate using the new format
-                LocalDate localDate = LocalDate.parse(date, dateFormatter);
+                // Convert date strings to LocalDate
+                LocalDate localDateLost = LocalDate.parse(date, dateFormatter);
+                LocalDate localDateFound = null;
+                if ("Encontrado".equals(status) && !dateFound.isEmpty()) {
+                    localDateFound = LocalDate.parse(dateFound, dateFormatter);
+                }
 
-                // Get database manager and add object
+                // Get database manager
                 MainFrame mainFrame = (MainFrame) getParent();
                 DatabaseManager dbManager = mainFrame.getDbManager();
 
-                // Create object with status "Perdido" by default
-                ObjetoPerdido objeto = new ObjetoPerdido(0, name, description, localDate, photo, "Perdido", null);
-                dbManager.addObject(objeto);
+                // Actualizar el objeto
+                ObjetoPerdido objetoActualizado = new ObjetoPerdido(
+                    objetoOriginal.getId(), name, description, localDateLost, photo, status, localDateFound
+                );
+                
+                // Update object in database
+                dbManager.updateObject(objetoActualizado);
 
                 // Refresh list and close dialog
                 mainFrame.refreshObjectList();
                 JOptionPane.showMessageDialog(this,
-                        "Objeto agregado exitosamente.",
+                        "Objeto actualizado exitosamente.",
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                        "Error al agregar el objeto: " + ex.getMessage(),
+                        "Error al actualizar el objeto: " + ex.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
@@ -198,19 +274,47 @@ public class AddObjectDialog extends JDialog {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         formPanel.add(todayButton, gbc);
-
+        
+        // Status field
         gbc.gridx = 0;
         gbc.gridy = 3;
+        formPanel.add(statusLabel, gbc);
+        
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(statusComboBox, gbc);
+        
+        // Date found field
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(dateFoundLabel, gbc);
+        
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(dateFoundField, gbc);
+        
+        gbc.gridx = 2;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(todayFoundButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         formPanel.add(photoButton, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 5;
         gbc.gridwidth = 2;
         photoPathLabel.setPreferredSize(new Dimension(300, 20));
         formPanel.add(photoPathLabel, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 6;
         gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         formPanel.add(photoPreview, gbc);
@@ -218,7 +322,7 @@ public class AddObjectDialog extends JDialog {
         // Button panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(PANEL_COLOR);
-        buttonPanel.add(addButton);
+        buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
@@ -226,7 +330,7 @@ public class AddObjectDialog extends JDialog {
 
         add(mainPanel);
         pack();
-        setSize(550, 600);
+        setSize(550, 650);
         setLocationRelativeTo(parent);
     }
     
